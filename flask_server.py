@@ -16,6 +16,11 @@ def hello_world():
 
 @app.route("/infer/<ticker>")
 def infer_from_sec10k(ticker: str) -> None:
+    print(f"Received request for ticker {ticker}")
+    status, msg = download_sec10k_data(ticker)
+    print(status, msg)
+    if not status:
+    	return jsonify({'info': msg, 'data': [], 'cols': []})
     info = parse_sec_info(model, ticker)
     data = parse_sec_data(model, ticker)
     cols = [list(datum.columns) for datum in data]
