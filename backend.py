@@ -64,11 +64,14 @@ def extract_text_from_html(html_file_path):
     clean_text = re.sub(r'<.*?>', '', text)
     return clean_text
 
-def download_sec10k_data(ticker: str, start: str = "1995-01-01", end: str = "2023-12-31", path: str = "/home/sahma61/sec-edgar-filings") -> None:
+def download_sec10k_data(ticker: str, start: str = "1995-01-01", end: str = "2023-12-31", path: str = "/home/sahma61/") -> None:
     dl = Downloader("MyCompanyName", "my.email@domain.com", path)
     print(f"Downloading 10-K filings for {ticker}")
-    dl.get("10-K", ticker, after=start, before=end)
-    return None
+    try:
+    	dl.get("10-K", ticker, after=start, before=end)
+    	return True, ""
+    except ValueError as er:
+    	return False, str(er)
 
 def parse_sec_data(model, ticker: str, path: str = "/home/sahma61/sec-edgar-filings") -> None:
     path += f'/{ticker}/10-K'
