@@ -14,17 +14,21 @@ app = Flask(__name__)
 def hello_world():
     return "<p>Hello, World!</p>"
 
-@app.route("/infer/<ticker>")
-def infer_from_sec10k(ticker: str) -> None:
-    print(f"Received request for ticker {ticker}")
-    status, msg = download_sec10k_data(ticker)
+@app.route("/infer/<ticker>/<start>/<end>")
+def infer_from_sec10k(ticker: str, start: str, end: str) -> None:
+    print(f"Received request for ticker {ticker} from {start} to {end}")
+    status, msg = download_sec10k_data(ticker, start, end)
     print(status, msg)
     if not status:
     	return jsonify({'info': msg, 'data': [], 'cols': []})
-    info = parse_sec_info(model, ticker)
-    data = parse_sec_data(model, ticker)
-    cols = [list(datum.columns) for datum in data]
-    data = [datum.to_dict('records') for datum in data]
+    try:
+    	info = parse_sec_info(model, ticker)
+    	data = parse_sec_data(model, ticker)
+    	cols = [list(datum.columns) for datum in data]
+    	data = [datum.to_dict('records') for datum in data]
+    except Exception as e:
+    	info = str(e)
+    	data = cols = []
     return jsonify({'info': info, 'data': data, 'cols': cols})
 
 

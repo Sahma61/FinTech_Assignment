@@ -77,7 +77,7 @@ def parse_sec_data(model, ticker: str, path: str = "/home/sahma61/sec-edgar-fili
     path += f'/{ticker}/10-K'
     for dr in os.listdir(path):
         text = extract_text_from_html(os.path.join(path, f'{dr}/full-submission.txt'))
-        response = model.generate_content("generate revenue and growth insights data from the 10K filings in tabular format, column should be years:\n" + text[:100000])
+        response = model.generate_content("generate revenue and growth insights data from the 10K filings in tabular format, column should be years:\n" + text[:50000])
         print(response.text)
         return get_dataframe(response.text)
 
@@ -85,5 +85,5 @@ def parse_sec_info(model, ticker: str, path: str = "/home/sahma61/sec-edgar-fili
     path += f'/{ticker}/10-K'
     for dr in os.listdir(path):
         text = extract_text_from_html(os.path.join(path, f'{dr}/full-submission.txt'))
-        response = model.generate_content("generate revenue and growth insights summary from the 10K filings, in 1000 words\n" + text[:100000])
+        response = model.generate_content("generate revenue and growth insights summary from the 10K filings, in 1000 words\n" + text[:50000])
         return response.text
