@@ -29,11 +29,10 @@ def get_dataframe(text: str) -> [pd.DataFrame]:
     current_table = []
     text = re.sub(r'[\'$(),%]', '', text)
     text = text.split("\n")
-    for i, t in enumerate(text):
-        line = t.split("|")
-        line = [x.strip() for x in line]
-        line = list(filter(lambda x: x, line))
-        print(line)
+    for i, txt in enumerate(text):
+        line = txt.split("|")
+        line = [col.strip() for col in line]
+        line = list(filter(lambda col: col, line))
         if line:
             if line[0].startswith('-') or line[0].startswith(':'):
                 continue
@@ -41,13 +40,13 @@ def get_dataframe(text: str) -> [pd.DataFrame]:
             line = [x.replace("$", "").strip() for x in line]
             new_line = []
             if i >= 1:
-                for x in line:
+                for col in line:
                     j = 0
-                    y = ""
-                    while j < len(x) and (x[j].isdigit() or x[j] == '.'):
-                        y += x[j]
+                    cmp_col = ""
+                    while j < len(col) and (col[j].isdigit() or col[j] == '.'):
+                        cmp_col += col[j]
                         j += 1
-                    new_line.append(y)
+                    new_line.append(cmp_col)
                 line = new_line
             current_table.append(line)
         else:
@@ -107,14 +106,14 @@ def download_sec10k_data(
         None
     """
 
-    dl = Downloader("MyCompanyName", "my.email@domain.com", path)
+    downloader = Downloader("MyCompanyName", "my.email@domain.com", path)
     print(f"Downloading 10-K filings for {ticker}")
     try:
-        dl.get("10-K", ticker, after=start, before=end)
+        downloader.get("10-K", ticker, after=start, before=end)
         print(f"Downloaded 10-K filings for {ticker}")
         return True, ""
     except ValueError as err:
-        print(f"Couldn't downloade 10-K filings for {ticker}")
+        print(f"Couldn't download 10-K filings for {ticker}")
         return False, str(err)
 
 
@@ -134,14 +133,13 @@ def parse_sec_data(
     """
 
     path += f'/{ticker}/10-K'
-    for dr in os.listdir(path):
+    for file in os.listdir(path):
         text = extract_text_from_html(
-                os.path.join(path, f'{dr}/full-submission.txt'))
+                os.path.join(path, f'{file}/full-submission.txt'))
         response = model.generate_content(
                 "generate revenue and growth insights data \
                 from the 10K filings in tabular format, \
                 column should be years:\n" + text[:50000])
-        print(response.text)
         return get_dataframe(response.text)
 
 
@@ -161,9 +159,9 @@ def parse_sec_info(
     """
 
     path += f'/{ticker}/10-K'
-    for dr in os.listdir(path):
+    for file in os.listdir(path):
         text = extract_text_from_html(
-                os.path.join(path, f'{dr}/full-submission.txt'))
+                os.path.join(path, f'{file}/full-submission.txt'))
         response = model.generate_content(
                 "generate revenue and growth insights summary \
                 from the 10K filings, in 1000 words\n" + text[:50000])

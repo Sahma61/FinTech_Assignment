@@ -7,7 +7,7 @@ fetch data and info from LLM APIS
 """
 
 import os
-from flask import Flask, jsonify
+from flask import Flask, render_template, jsonify
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -19,7 +19,14 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    """
+    Landing Page
+
+    args:
+    returns:
+        str - Marker to direct user to infer end-point
+    """
+    return render_template('landing_page.html')
 
 
 @app.route("/infer/<ticker>/<start>/<end>")
@@ -51,8 +58,8 @@ def infer_from_sec10k(
 
         cols = [list(datum.columns) for datum in data]
         data = [datum.to_dict('records') for datum in data]
-    except Exception as e:
-        info = str(e)
+    except Exception as err:
+        info = str(err)
         data = cols = []
     return jsonify({'info': info, 'data': data, 'cols': cols})
 
