@@ -181,7 +181,7 @@ def update_data(
 )
 def update_graph(
         graph_type: str,
-        y_axis_column: pd.Series) -> any:
+        y_axis_column: str) -> any:
     """
     Updates graph whenever graph-type or
     y-coordinate changes
@@ -190,7 +190,7 @@ def update_graph(
 
     args:
         graph_type: str -  the tyep of graph to display
-        y_axis_column: pd.Series - Series of y-axis values
+        y_axis_column: str - Column name for y-axis values
     returns:
         any - the updated figure object to be displayed
     """
