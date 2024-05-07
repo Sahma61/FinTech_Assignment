@@ -1,11 +1,11 @@
 The project contains the following components:
 
 1. **backend.py** (Python3) - module that contains:
-   a. Utility to download SEC 10-K filings
-   b. Utility to fetch data from LLM Model
-   c. Utility to fetch info from LLM Model
-   d. Utility to parse text from HTML page
-   e. Utility to get Pandas DataFrame from list of string info
+   - Utility to download SEC 10-K filings
+   - Utility to fetch data from LLM Model
+   - Utility to fetch info from LLM Model
+   - Utility to parse text from HTML page
+   - Utility to get Pandas DataFrame from list of string info
 
 2. **flask_server.py** (Python3, Flask)  - Locally-hosted Flask Server that initializes the LLM Model and utilizes the backend utilities to fetch data and info from LLM APIs.
 
