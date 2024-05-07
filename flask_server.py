@@ -1,39 +1,64 @@
+#!/usr/bin/python3
+
+"""
+Flask Server that initializes the LLM Model
+and utilizes the backend utilities to
+fetch data and info from LLM APIS
+"""
+
 import os
-
 from flask import Flask, jsonify
-from dotenv import load_dotenv
+
 import google.generativeai as genai
+from dotenv import load_dotenv
 
-from backend import *
-
-load_dotenv()
+from backend import download_sec10k_data, parse_sec_info, parse_sec_data
 
 app = Flask(__name__)
+
 
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
 
+
 @app.route("/infer/<ticker>/<start>/<end>")
-def infer_from_sec10k(ticker: str, start: str, end: str) -> None:
+def infer_from_sec10k(
+        ticker: str,
+        start: str,
+        end: str) -> str:
+    """
+    Fetches sec 10-k data and info from the LLM API
+    args:
+        ticker: str - company ticker
+        start: str - start date
+        end: str - end date
+    returns:
+        str - JSON string containing  data, info, column names
+    """
     print(f"Received request for ticker {ticker} from {start} to {end}")
     status, msg = download_sec10k_data(ticker, start, end)
-    print(status, msg)
     if not status:
-    	return jsonify({'info': msg, 'data': [], 'cols': []})
+        return jsonify({'info': msg, 'data': [], 'cols': []})
     try:
-    	info = parse_sec_info(model, ticker)
-    	data = parse_sec_data(model, ticker)
-    	cols = [list(datum.columns) for datum in data]
-    	data = [datum.to_dict('records') for datum in data]
+        print("Parsing Info from 10-K filings")
+        info = parse_sec_info(model, ticker)
+        print("Parsed Info from 10-K filings")
+
+        print("Parsing Data from 10-K filings")
+        data = parse_sec_data(model, ticker)
+        print("Parsed Data from 10-K filings")
+
+        cols = [list(datum.columns) for datum in data]
+        data = [datum.to_dict('records') for datum in data]
     except Exception as e:
-    	info = str(e)
-    	data = cols = []
+        info = str(e)
+        data = cols = []
     return jsonify({'info': info, 'data': data, 'cols': cols})
 
 
 if __name__ == "__main__":
-    os.environ['GOOGLE_API_KEY'] = "AIzaSyBNRZ25ezFXLH8TIhRPTOjuIdozGc4cWtY"
-    genai.configure(api_key="AIzaSyBNRZ25ezFXLH8TIhRPTOjuIdozGc4cWtY")
+    load_dotenv()
+    genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
     model = genai.GenerativeModel('gemini-pro')
     app.run('127.0.0.1', 8001)

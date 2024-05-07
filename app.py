@@ -1,6 +1,12 @@
+#!/usr/bin/python3
+
+"""
+Dash App to visualize SEC 10-k
+Data and Info from the Backend Flask Server
+"""
+
 import requests
-import json
-from dash import Dash, html, dash_table, dcc, callback, Output, Input, State
+from dash import Dash, html, dash_table, dcc, Output, Input, State
 import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
@@ -83,14 +89,13 @@ app.layout = dbc.Container([
      State('end-date', 'date')]
 )
 def update_data(n_clicks, stock_symbol, start_date, end_date):
-    print(start_date, end_date)
     if not n_clicks:
         return [], [], ''
     
     # Fetch data
     start_date = start_date[:10]
     end_date = end_date[:10]
-    print(start_date, end_date)
+    print(f"Received request for {stock_symbol} from {start_date} to {end_date}")
     response = requests.get(f'http://127.0.0.1:8001/infer/{stock_symbol}/{start_date}/{end_date}')
     
     if response.status_code != 200:
@@ -133,6 +138,7 @@ def update_graph(graph_type, y_axis_column):
         fig = {}
     
     return fig
+
 
 # Run the app
 if __name__ == '__main__':
