@@ -5,28 +5,46 @@ Dash App to visualize SEC 10-k
 Data and Info from the Backend Flask Server
 """
 
+from datetime import datetime as dt
 import requests
 from dash import Dash, html, dash_table, dcc, Output, Input, State
 import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
-from datetime import datetime as dt
 
 header = ''
 data = []
-info_text = ''
-prev_clicks = 0
 
 # Initialize the app
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], title="SEC-10K Filing Viewer")
+app = Dash(
+        __name__,
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        title="SEC-10K Filing Viewer"
+        )
 
 # App layout with loading indicator
 app.layout = dbc.Container([
-    html.Div(children='SEC-10K Filing Viewer', style={'font-size': '24px', 'font-weight': 'bold', 'margin-bottom': '10px', 'text-align': 'center'}),
+    html.Div(
+        children='SEC-10K Filing Viewer',
+        style={
+            'font-size': '24px',
+            'font-weight': 'bold',
+            'margin-bottom': '10px',
+            'text-align': 'center'
+            }
+        ),
     html.Hr(),
     html.Div([
         html.Label("Enter stock symbol:"),
-        dcc.Input(id='stock-symbol', type='text', value='MSFT', style={'margin-right': '10px', 'width': '200px'}),
+        dcc.Input(
+            id='stock-symbol',
+            type='text',
+            value='',
+            style={
+                'margin-right': '10px',
+                'width': '200px'
+                }
+            ),
         html.Label("Start Date:"),
         dcc.DatePickerSingle(
             id='start-date',
@@ -47,7 +65,18 @@ app.layout = dbc.Container([
             display_format='YYYY-MM-DD',
             style={'margin-right': '10px'}
         ),
-        dbc.Button("Submit", id='submit-val', n_clicks=0, color="primary", className="mr-1", type='button', style={'font-size': '18px', 'border-radius': '1px'}),
+        dbc.Button(
+            "Submit",
+            id='submit-val',
+            n_clicks=0,
+            color="primary",
+            className="mr-1",
+            type='button',
+            style={
+                'font-size': '18px',
+                'border-radius': '1px'
+                }
+            ),
         html.Div(id='output-container-button'),
     ]),
     html.Hr(),
@@ -69,7 +98,14 @@ app.layout = dbc.Container([
     ]),
     html.Hr(),
     html.Div([
-        html.Label("SEC 10-K Information (1000 words max):", style={'font-size': '24px', 'font-weight': 'bold', 'color': 'blue'}),
+        html.Label(
+            "SEC 10-K Information (1000 words max):",
+            style={
+                'font-size': '24px',
+                'font-weight': 'bold',
+                'color': 'blue'
+                }
+            ),
         dcc.Loading(
             id="info-div-loading",
             type="default",
@@ -88,29 +124,51 @@ app.layout = dbc.Container([
      State('start-date', 'date'),
      State('end-date', 'date')]
 )
-def update_data(n_clicks, stock_symbol, start_date, end_date):
+def update_data(
+        n_clicks: int,
+        stock_symbol: str,
+        start_date: str,
+        end_date: str) -> tuple:
+    """
+    Fetches Data from the Backend and
+    updates the front-end Dashboard.
+
+    Triggered Whenever the Submit button is clicked
+
+    args:
+        n_clicks: int - the mouse click count
+        stock_symbol: str - company ticker
+        start_date: str - start date
+        end_date: str - end date
+    returns:
+        tuple - options, tabular data and text info are returned
+    """
     if not n_clicks:
         return [], [], ''
-    
+
     # Fetch data
     start_date = start_date[:10]
     end_date = end_date[:10]
-    print(f"Received request for {stock_symbol} from {start_date} to {end_date}")
-    response = requests.get(f'http://127.0.0.1:8001/infer/{stock_symbol}/{start_date}/{end_date}')
-    
+    print(f"Received request for {stock_symbol} \
+            from {start_date} to {end_date}")
+    url = f'http://127.0.0.1:8001/infer/{stock_symbol}/{start_date}/{end_date}'
+    response = requests.get(url)
+
     if response.status_code != 200:
         return [], [], "Error fetching data"
-    
+
     response_data = response.json()
-    
+
     if not response_data['data']:
         return [], [], response_data['info']
-        
-    df = pd.DataFrame(response_data['data'][0], columns=response_data['cols'][0])
-    options = [{'label': col, 'value': col} for col in df.columns[1:]]
+
+    data_frame = pd.DataFrame(
+            response_data['data'][0],
+            columns=response_data['cols'][0])
+    options = [{'label': col, 'value': col} for col in data_frame.columns[1:]]
     global data, header
-    data = df.to_dict('records')
-    header = df.columns[0]
+    data = data_frame.to_dict('records')
+    header = data_frame.columns[0]
 
     return options, data, response_data['info']
 
@@ -121,11 +179,26 @@ def update_data(n_clicks, stock_symbol, start_date, end_date):
     [Input('graph-type', 'value'),
      Input('y-axis-column', 'value')]
 )
-def update_graph(graph_type, y_axis_column):
+def update_graph(
+        graph_type: str,
+        y_axis_column: pd.Series) -> any:
+    """
+    Updates graph whenever graph-type or
+    y-coordinate changes
+
+    Triggered Whenever the Dropdown Values are changed
+
+    args:
+        graph_type: str -  the tyep of graph to display
+        y_axis_column: pd.Series - Series of y-axis values
+    returns:
+        any - the updated figure object to be displayed
+    """
+
     if not data or not y_axis_column:
         # Return empty figure if data or y_axis_column is empty
         return {}
-    
+
     if graph_type == 'histogram':
         fig = px.histogram(data, x=header, y=y_axis_column, histfunc='avg')
     elif graph_type == 'scatter':
@@ -136,11 +209,10 @@ def update_graph(graph_type, y_axis_column):
         fig = px.pie(data, values=y_axis_column, names=header)
     else:
         fig = {}
-    
+
     return fig
 
 
 # Run the app
 if __name__ == '__main__':
     app.run_server(debug=True)
-
