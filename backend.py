@@ -9,20 +9,20 @@ Module contains:
 
 import os
 import re
-import pandas as pd
 from bs4 import BeautifulSoup
+from pandas import DataFrame
 
 import google.generativeai as genai
 from sec_edgar_downloader import Downloader
 
 
-def get_dataframe(text: str) -> [pd.DataFrame]:
+def get_dataframe(text: str) -> list[DataFrame]:
     """
     Converts string data to a list of pandas Dataframe
     args:
         text: str - output data from the LLM
     returns:
-        [pd.DataFrame] - list of tables, each table as a pandas df
+        [DataFrame] - list of tables, each table as a pandas df
     """
 
     tables = []
@@ -51,21 +51,21 @@ def get_dataframe(text: str) -> [pd.DataFrame]:
             current_table.append(line)
         else:
             tables.append(
-                    pd.DataFrame(
-                        current_table[1:],
-                        columns=current_table[0]
-                        )
-                    )
+                DataFrame(
+                    current_table[1:],
+                    columns=current_table[0]
+                )
+            )
             current_table = []
 
     if current_table:
         print(current_table)
         tables.append(
-                pd.DataFrame(
-                    current_table[1:],
-                    columns=current_table[0]
-                    )
-                )
+            DataFrame(
+                current_table[1:],
+                columns=current_table[0]
+            )
+        )
 
     return tables
 
@@ -120,7 +120,7 @@ def download_sec10k_data(
 def parse_sec_data(
         model: genai.GenerativeModel,
         ticker: str,
-        path: str = "/home/sahma61/sec-edgar-filings") -> [pd.DataFrame]:
+        path: str = "/home/sahma61/sec-edgar-filings") -> list[DataFrame]:
     """
     Fetches sec 10-k data from
     LLM API and parses the Data into string
@@ -129,17 +129,17 @@ def parse_sec_data(
         ticker: str - company ticker
         path: str - path to the sec 10-K filings Path
     returns:
-        [pd.DataFrame] - list of tables, each table as a pandas df
+        [DataFrame] - list of tables, each table as a pandas df
     """
 
     path += f'/{ticker}/10-K'
     for file in os.listdir(path):
         text = extract_text_from_html(
-                os.path.join(path, f'{file}/full-submission.txt'))
+            os.path.join(path, f'{file}/full-submission.txt'))
         response = model.generate_content(
-                "generate revenue and growth insights data \
-                from the 10K filings in tabular format, \
-                column should be years:\n" + text[:50000])
+            "generate revenue and growth insights data \
+            from the 10K filings in tabular format, \
+            column should be years:\n" + text[:50000])
         return get_dataframe(response.text)
 
 
@@ -161,8 +161,8 @@ def parse_sec_info(
     path += f'/{ticker}/10-K'
     for file in os.listdir(path):
         text = extract_text_from_html(
-                os.path.join(path, f'{file}/full-submission.txt'))
+            os.path.join(path, f'{file}/full-submission.txt'))
         response = model.generate_content(
-                "generate revenue and growth insights summary \
-                from the 10K filings, in 1000 words\n" + text[:50000])
+            "generate revenue and growth insights summary \
+            from the 10K filings, in 1000 words\n" + text[:50000])
         return response.text
