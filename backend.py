@@ -11,6 +11,7 @@ Module contains:
 
 import os
 import re
+from typing import List
 from bs4 import BeautifulSoup
 from pandas import DataFrame
 
@@ -18,15 +19,15 @@ import google.generativeai as genai
 from sec_edgar_downloader import Downloader
 
 
-def get_dataframe(text: str) -> list[DataFrame]:
+def get_dataframe(text: str) -> List[DataFrame]:
     """
     Get DataFrame Function.
-    
+
     Converts string data to a list of pandas Dataframe
     args:
         text: str - output data from the LLM
     returns:
-        [DataFrame] - list of tables, each table as a pandas df
+        List[DataFrame] - list of tables, each table as a pandas df
     """
     tables = []
     current_table = []
@@ -76,7 +77,7 @@ def get_dataframe(text: str) -> list[DataFrame]:
 def extract_text_from_html(html_file_path: str) -> str:
     """
     Extract text from html tags.
-    
+
     Utility to extract string from html pages.
     args:
         html_file_path: str - path to raw 10-K filings file
@@ -100,7 +101,7 @@ def download_sec10k_data(
         path: str = "/home/sahma61/") -> None:
     """
     Download SEC 10-k Data.
-    
+
     downloads sec 10-k data by ticker
     and start and end dates.
     args:
@@ -125,10 +126,10 @@ def download_sec10k_data(
 def parse_sec_data(
         model: genai.GenerativeModel,
         ticker: str,
-        path: str = "/home/sahma61/sec-edgar-filings") -> list[DataFrame]:
+        path: str = "/home/sahma61/sec-edgar-filings") -> List[DataFrame]:
     """
     Fetch sec 10-k data.
-    
+
     fetches sec 10-k data from
     LLM API and parses the Data into string
     args:
@@ -136,7 +137,7 @@ def parse_sec_data(
         ticker: str - company ticker
         path: str - path to the sec 10-K filings Path
     returns:
-        [DataFrame] - list of tables, each table as a pandas df
+        List[DataFrame] - list of tables, each table as a pandas df
     """
     path += f'/{ticker}/10-K'
     for file in os.listdir(path):
@@ -155,7 +156,7 @@ def parse_sec_info(
         path: str = "/home/sahma61/sec-edgar-filings") -> str:
     """
     Fetch sec 10-k info.
-    
+
     fetches sec 10-k info from
     LLM API and parses the Data into string
     args:

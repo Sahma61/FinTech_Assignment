@@ -8,6 +8,7 @@ and displays them in a webpage
 """
 
 from datetime import datetime as dt
+from typing import Any
 import requests
 from dash import Dash, html, dash_table, dcc, Output, Input, State
 import pandas as pd
@@ -133,7 +134,7 @@ def update_data(
         end_date: str) -> tuple:
     """
     Update Dashboard.
-    
+
     Fetches Data from the Backend and
     updates the front-end Dashboard.
     Triggered Whenever the Submit button is clicked
@@ -184,10 +185,10 @@ from {start_date} to {end_date}")
 )
 def update_graph(
         graph_type: str,
-        y_axis_column: str) -> any:
+        y_axis_column: str) -> Any:
     """
     Update Graph.
-    
+
     Updates graph whenever graph-type or
     y-coordinate changes.
     Triggered Whenever the Dropdown Values are changed
