@@ -1,4 +1,6 @@
 """
+Backend Module.
+
 Module contains:
     utility to download sec 10-k filings
     utility to fetch data from LLM Model
@@ -18,13 +20,14 @@ from sec_edgar_downloader import Downloader
 
 def get_dataframe(text: str) -> list[DataFrame]:
     """
+    Get DataFrame Function.
+    
     Converts string data to a list of pandas Dataframe
     args:
         text: str - output data from the LLM
     returns:
         [DataFrame] - list of tables, each table as a pandas df
     """
-
     tables = []
     current_table = []
     text = re.sub(r'[\'$(),%]', '', text)
@@ -72,13 +75,14 @@ def get_dataframe(text: str) -> list[DataFrame]:
 
 def extract_text_from_html(html_file_path: str) -> str:
     """
-    Extracts text from html tags
+    Extract text from html tags.
+    
+    Utility to extract string from html pages.
     args:
         html_file_path: str - path to raw 10-K filings file
     returns:
         str - processed text with html tags removed
     """
-
     with open(html_file_path, 'r', encoding='utf-8') as file:
         html_content = file.read()
 
@@ -95,8 +99,10 @@ def download_sec10k_data(
         end: str = "2023-12-31",
         path: str = "/home/sahma61/") -> None:
     """
-    Downloads SEC 10-k Data by ticker
-    and start and end dates
+    Download SEC 10-k Data.
+    
+    downloads sec 10-k data by ticker
+    and start and end dates.
     args:
         ticker: str - the company ticker
         start: str - start date
@@ -105,7 +111,6 @@ def download_sec10k_data(
     returns:
         None
     """
-
     downloader = Downloader("MyCompanyName", "my.email@domain.com", path)
     print(f"Downloading 10-K filings for {ticker}")
     try:
@@ -122,7 +127,9 @@ def parse_sec_data(
         ticker: str,
         path: str = "/home/sahma61/sec-edgar-filings") -> list[DataFrame]:
     """
-    Fetches sec 10-k data from
+    Fetch sec 10-k data.
+    
+    fetches sec 10-k data from
     LLM API and parses the Data into string
     args:
         model: genai.GenerativeModel - LLM Model to fetch data from
@@ -131,7 +138,6 @@ def parse_sec_data(
     returns:
         [DataFrame] - list of tables, each table as a pandas df
     """
-
     path += f'/{ticker}/10-K'
     for file in os.listdir(path):
         text = extract_text_from_html(
@@ -148,7 +154,9 @@ def parse_sec_info(
         ticker: str,
         path: str = "/home/sahma61/sec-edgar-filings") -> str:
     """
-    Fetches sec 10-k data from
+    Fetch sec 10-k info.
+    
+    fetches sec 10-k info from
     LLM API and parses the Data into string
     args:
         model: genai.GenerativeModel - LLM Model to fetch info from
@@ -157,7 +165,6 @@ def parse_sec_info(
     returns:
         str - the info output from LLM Model
     """
-
     path += f'/{ticker}/10-K'
     for file in os.listdir(path):
         text = extract_text_from_html(

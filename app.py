@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
 """
-Dash App to visualize SEC 10-k
-Data and Info from the Backend Flask Server
+Dash App to visualize SEC 10-k.
+
+Fetches data and info from the Backend Flask Server
+and displays them in a webpage
 """
 
 from datetime import datetime as dt
@@ -17,10 +19,10 @@ data = []
 
 # Initialize the app
 app = Dash(
-        __name__,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
-        title="SEC-10K Filing Viewer"
-        )
+    __name__,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    title="SEC-10K Filing Viewer"
+)
 
 # App layout with loading indicator
 app.layout = dbc.Container([
@@ -31,8 +33,8 @@ app.layout = dbc.Container([
             'font-weight': 'bold',
             'margin-bottom': '10px',
             'text-align': 'center'
-            }
-        ),
+        }
+    ),
     html.Hr(),
     html.Div([
         html.Label("Enter stock symbol:"),
@@ -43,8 +45,8 @@ app.layout = dbc.Container([
             style={
                 'margin-right': '10px',
                 'width': '200px'
-                }
-            ),
+            }
+        ),
         html.Label("Start Date:"),
         dcc.DatePickerSingle(
             id='start-date',
@@ -75,8 +77,8 @@ app.layout = dbc.Container([
             style={
                 'font-size': '18px',
                 'border-radius': '1px'
-                }
-            ),
+            }
+        ),
         html.Div(id='output-container-button'),
     ]),
     html.Hr(),
@@ -104,8 +106,8 @@ app.layout = dbc.Container([
                 'font-size': '24px',
                 'font-weight': 'bold',
                 'color': 'blue'
-                }
-            ),
+            }
+        ),
         dcc.Loading(
             id="info-div-loading",
             type="default",
@@ -130,9 +132,10 @@ def update_data(
         start_date: str,
         end_date: str) -> tuple:
     """
+    Update Dashboard.
+    
     Fetches Data from the Backend and
     updates the front-end Dashboard.
-
     Triggered Whenever the Submit button is clicked
 
     args:
@@ -150,7 +153,7 @@ def update_data(
     start_date = start_date[:10]
     end_date = end_date[:10]
     print(f"Received request for {stock_symbol} \
-            from {start_date} to {end_date}")
+from {start_date} to {end_date}")
     url = f'http://127.0.0.1:8001/infer/{stock_symbol}/{start_date}/{end_date}'
     response = requests.get(url)
 
@@ -163,8 +166,8 @@ def update_data(
         return [], [], response_data['info']
 
     data_frame = pd.DataFrame(
-            response_data['data'][0],
-            columns=response_data['cols'][0])
+        response_data['data'][0],
+        columns=response_data['cols'][0])
     options = [{'label': col, 'value': col} for col in data_frame.columns[1:]]
     global data, header
     data = data_frame.to_dict('records')
@@ -183,9 +186,10 @@ def update_graph(
         graph_type: str,
         y_axis_column: str) -> any:
     """
+    Update Graph.
+    
     Updates graph whenever graph-type or
-    y-coordinate changes
-
+    y-coordinate changes.
     Triggered Whenever the Dropdown Values are changed
 
     args:
@@ -194,7 +198,6 @@ def update_graph(
     returns:
         any - the updated figure object to be displayed
     """
-
     if not data or not y_axis_column:
         # Return empty figure if data or y_axis_column is empty
         return {}

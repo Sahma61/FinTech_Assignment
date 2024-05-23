@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 """
+Flask server Module.
+
 Flask Server that initializes the LLM Model
 and utilizes the backend utilities to
 fetch data and info from LLM APIS
@@ -20,7 +22,7 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world() -> str:
     """
-    Landing Page
+    Landing Page.
 
     args:
     returns:
@@ -35,7 +37,9 @@ def infer_from_sec10k(
         start: str,
         end: str) -> str:
     """
-    Fetches sec 10-k data and info from the LLM API
+    Fetch sec 10-k data and info.
+    
+    fetches sec 10-k data and info from the LLM API
     args:
         ticker: str - company ticker
         start: str - start date
